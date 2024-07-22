@@ -1,10 +1,24 @@
 // src/context/AudiobookContext.tsx
 import React, { createContext, useState, ReactNode, useContext } from 'react';
-import { Audiobook } from '../types'; // Import the Audiobook type
+
+interface Audiobook {
+  _id: string;
+  name: string;
+  author: string;
+  imageData?: string; // Optional because it may not always be present
+  description?: string;
+  genres?: string[];
+  rating?: number;
+  reviews?: {
+    user_name: string;
+    review: string;
+    rating: number;
+  }[];
+}
 
 interface AudiobookContextType {
   selectedAudiobook: Audiobook | null;
-  setSelectedAudiobook: (audiobook: Audiobook) => void;
+  setSelectedAudiobook: React.Dispatch<React.SetStateAction<Audiobook | null>>;
 }
 
 const AudiobookContext = createContext<AudiobookContextType | undefined>(undefined);
@@ -19,9 +33,9 @@ export const AudiobookProvider: React.FC<{ children: ReactNode }> = ({ children 
   );
 };
 
-export const useAudiobook = () => {
+export const useAudiobook = (): AudiobookContextType => {
   const context = useContext(AudiobookContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAudiobook must be used within an AudiobookProvider');
   }
   return context;

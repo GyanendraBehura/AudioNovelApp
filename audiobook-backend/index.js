@@ -76,6 +76,32 @@ app.get('/api/audiobooks', async (req, res) => {
   }
 });
 
+app.post('/api/audiobooks/:id/reviews', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { user_name, rating, review } = req.body;
+
+    const audiobook = await Audiobook.findById(id);
+    if (!audiobook) {
+      return res.status(404).json({ error: 'Audiobook not found' });
+    }
+
+    const newReview = { user_name, rating, review };
+    audiobook.reviews.push(newReview);
+
+    // Recalculate the average rating
+    const totalRating = audiobook.reviews.reduce((sum, r) => sum + r.rating, 0);
+    const averageRating = totalRating / audiobook.reviews.length;
+    audiobook.rating = averageRating;
+
+    const updatedAudiobook = await audiobook.save();
+    res.status(201).json(newReview);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

@@ -1,11 +1,31 @@
-// src/components/AudiobookDetails.tsx
-import React from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
 import { useAudiobook } from '../context/AudiobookContext';
+import ReviewFormModal from './ReviewFormModal';
 
 const AudiobookDetails: React.FC = () => {
-  const { selectedAudiobook } = useAudiobook();
+  const { selectedAudiobook, setSelectedAudiobook } = useAudiobook();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   if (!selectedAudiobook) return <p>No audiobook selected</p>;
+
+  const handleReviewAdded = async (newReview: { user_name: string; review: string; rating: number }) => {
+    try {
+      const response = await axios.post(`http://localhost:5000/api/audiobooks/${selectedAudiobook._id}/reviews`, newReview);
+      const updatedReview = response.data;
+
+      setSelectedAudiobook((prev: any) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          reviews: [...(prev.reviews || []), updatedReview],
+          rating: (prev.reviews.reduce((sum: number, r: { rating: number }) => sum + r.rating, updatedReview.rating)) / (prev.reviews.length + 1),
+        };
+      });
+    } catch (err) {
+      console.error('Error adding review:', err);
+    }
+  };
 
   return (
     <div className="p-4">
@@ -30,6 +50,16 @@ const AudiobookDetails: React.FC = () => {
           </div>
         ))}
       </div>
+      <button onClick={() => setIsModalOpen(true)} className="mt-4 p-2 bg-blue-500 text-white rounded">
+        Add Review
+      </button>
+      {isModalOpen && (
+        <ReviewFormModal
+          audiobookId={selectedAudiobook._id}
+          onClose={() => setIsModalOpen(false)}
+          onReviewAdded={handleReviewAdded}
+        />
+      )}
     </div>
   );
 };

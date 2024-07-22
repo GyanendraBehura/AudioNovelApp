@@ -45,7 +45,7 @@ The frontend is a single-page application built with React. It provides the foll
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/AudioNovelApp.git
+   [git clone https://github.com/GyanendraBehura/AudioNovelApp.git
    cd AudioNovelApp/audiobook-backend
    ```
 
